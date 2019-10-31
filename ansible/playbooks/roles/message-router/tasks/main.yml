@@ -1,0 +1,76 @@
+---
+#
+# following instructions found at 
+# https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-service-provider-message-routing-administration-13-0-0/2.html
+#
+
+- name: Create pool
+  bigip_pool:
+    provider: "{{ bigip_provider }}"
+    state: present
+    name: my-pool
+    partition: Common
+    lb_method: least-connections-member
+    slow_ramp_time: 120
+  delegate_to: localhost
+
+- name: Create generic transport config
+  bigip_message_routing_transport_config:
+    name: foovirtual
+    profiles: "genericmsg,tcp-lan-optimized"
+    description: new_transport
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+- name: Create message routing peer with additional settings
+  bigip_message_routing_peer:
+    name: foobar
+    connection_mode: per-blade
+    pool: my-pool
+    partition: Common
+    transport_config: foovirtual
+    ratio: 10
+    auto_init: yes
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+- name: Create a simple generic route
+  bigip_message_routing_route:
+    name: route1
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+- name: Create a simple generic route
+  bigip_message_routing_route:
+    name: route2
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+
+- name: Create a generic router profile
+  bigip_message_routing_router:
+    name: foorouterprofile
+    max_retries: 10
+    ignore_client_port: yes
+    routes:
+      - /Common/route1
+      - /Common/route2
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+- name: Add virtual server
+  bigip_virtual_server:
+    state: present
+    partition: Common
+    name: my-virtual-server
+    destination: 10.10.10.10
+    type: message-routing
+    port: 3868
+    pool: my-pool
+    snat: Automap
+    description: Test Virtual Server
+    profiles:
+      - tcp
+      - diameter
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost

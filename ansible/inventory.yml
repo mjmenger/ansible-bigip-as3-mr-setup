@@ -1,0 +1,13 @@
+---
+all:
+  children:
+    big_ips:
+      hosts:
+        10.10.10.10:
+          bigip_provider:
+            server: "{{ inventory_hostname }}"
+            user: "admin"
+            password: "abcdef123"
+            validate_certs: no
+          bigip_validate_certs: false
+
