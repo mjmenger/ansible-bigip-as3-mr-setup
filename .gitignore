@@ -1,5 +1,6 @@
 # ignore rpms and sha256 files
 *.rpm
+*.deb
 *.sha256
 
 #  Local .terraform directories
