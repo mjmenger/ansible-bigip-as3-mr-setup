@@ -1,4 +1,9 @@
 ---
+- name: Execute AS3 declaration
+  import_tasks: as3.yml
+
+
+
 #
 # following instructions found at 
 # https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-service-provider-message-routing-administration-13-0-0/2.html
@@ -19,16 +24,16 @@
     name: mr-protocol-smpp-control
     description: 'SMPP Internal Messaging'
     no_response: yes
-    disable-parser: yes
+    disable_parser: yes
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
  
 - name: Create a generic parser
   bigip_message_routing_protocol:
     name: mr-protocol-smpp
-    description: 'Short Message Peer-to-Peer Protocol"'
+    description: 'Short Message Peer-to-Peer Protocol'
     no_response: yes
-    disable-parser: yes
+    disable_parser: yes
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
  
@@ -49,15 +54,13 @@
       - /Common/mr-route-smpp-default
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
- 
+
 - name: Create generic transport config
   bigip_message_routing_transport_config:
     name: mr-transport-smpp
     description: 'Short Message Peer-to-Peer Static Peer Transport'
-    profiles:
-      transport: mr-protocol-smpp
-      tcp: f5-tcp-lan
+    profiles: "mr-protocol-smpp, f5-tcp-lan"
     rules:
-     - /Common/__smpp_basic
+      - /Common/__smpp_basic
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
