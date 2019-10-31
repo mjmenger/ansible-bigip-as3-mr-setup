@@ -12,12 +12,21 @@ Once the container is running run the following;
 ./install-ubuntu-dependencies.sh
 ```
 
+update ansible/inventory with the address and authentication information for the BIG-IP you want to configure. **DO NOT COMMIT THESE CHANGES TO SOURCE CONTROL**
+
 **Note**: Some of the modules referenced in this demonstration are currently in preview release. Consequently, a pre-release version of ansible will be installed by the dependencies script.
 
-
+```bash
+./deploy.sh
+```
 
 ## big-ip role
 Installs specified versions of Application Services, Declarative On-boarding, and Telemetry Streaming on the identified BIG-IP
 
 ## message-router role
 Configures the elements required for diameter message routing
+
+
+
+
+
