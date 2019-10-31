@@ -12,7 +12,7 @@ Once the container is running run the following;
 ./install-ubuntu-dependencies.sh
 ```
 
-**Note**: Some of the modules referenced in this demonstration are currently in preview release. Consequently, a pre-release version of ansible will be installed by the dependencies script.
+**Note**: Some of the modules referenced in this demonstration are currently in preview release. Consequently, a pre-release version of ansible will be installed by the dependencies script. (<-- this is a real good reason for using the docker container mentioned above)
 
 
 
