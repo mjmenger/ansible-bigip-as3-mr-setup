@@ -12,6 +12,7 @@ sudo pip install -q jmespath
 sudo apt install wget
 wget https://packages.chef.io/files/stable/inspec/4.18.0/ubuntu/18.04/inspec_4.18.0-1_amd64.deb
 sudo dpkg -i inspec_4.18.0-1_amd64.deb
+rm inspec_4.18.0-1_amd64.deb
 
 # install the unique version of ansible required for these modules
 pip install git+https://github.com/ansible/ansible.git@stable-2.9
