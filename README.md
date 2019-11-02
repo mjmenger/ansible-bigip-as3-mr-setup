@@ -14,10 +14,14 @@ Once the container is running run the following;
 
 update ansible/inventory.yml with the address and authentication information for the BIG-IP you want to configure. **DO NOT COMMIT THESE CHANGES TO SOURCE CONTROL**
 
-**Note**: Some of the modules referenced in this demonstration are currently in preview release. Consequently, a pre-release version of ansible will be installed by the dependencies script.
-
 ```bash
 ./deploy.sh
+```
+
+**Note:** Many of the BIG-IP objects created by this playbook are not visible through the BIG-IP Web UI. The following command run at the TMOS command line will show the object configurations if the playbook executed successfully.
+
+```bash
+list ltm message-routing generic
 ```
 
 ## big-ip role
