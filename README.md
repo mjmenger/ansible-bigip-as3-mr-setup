@@ -1,5 +1,5 @@
 # Demonstration Ansible playbooks for BIG-IP configuration
-TBD what's the purpose of this repo
+Sample Ansible playbook for PoC of SMPP solution.
 
 As a convenience, it is strongly suggested that you use the following docker container to encapsulate the unique runtime requirements of this repository, in particular the recently released ansible 2.9.
 ```bash
@@ -24,9 +24,5 @@ update ansible/inventory.yml with the address and authentication information for
 Installs specified versions of Application Services, Declarative On-boarding, and Telemetry Streaming on the identified BIG-IP
 
 ## message-router role
-Configures the elements required for generic message routing
-
-
-
-
+Configures the elements required for SMPP message routing via generic MRF objects.
 
