@@ -4,31 +4,66 @@
 # https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-service-provider-message-routing-administration-13-0-0/2.html
 #
 
+- name: Download iRule source
+  get_url:
+    url: 'https://raw.githubusercontent.com/rduchez/SMPP/master/smpp_irule_basic'
+    dest: "~/smpp_irule.tcl"
+    mode: '0440'
+
+- name: Add the iRule contained in template irule.tcl to the LTM module
+  bigip_irule:
+    content: "{{ lookup('template', '~/smpp_irule.tcl') }}"
+    module: ltm
+    name: smpp_generic
+    state: present
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
 - name: Create pool
   bigip_pool:
     provider: "{{ bigip_provider }}"
     state: present
-    name: my-pool
+    name: smpp-pool
     partition: Common
     lb_method: least-connections-member
     slow_ramp_time: 120
   delegate_to: localhost
 
+- name: Create a generic parser
+  bigip_message_routing_protocol:
+    name: mr-protocol-smpp-control
+    description: 'SMPP Internal Messaging'
+    no_response: yes # creates route table entry without return route
+    disable_parser: yes
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
+- name: Create a generic parser
+  bigip_message_routing_protocol:
+    name: mr-protocol-smpp
+    description: 'Short Message Peer-to-Peer Protocol'
+    no_response: yes
+    disable_parser: yes
+    provider: "{{ bigip_provider }}"
+  delegate_to: localhost
+
 - name: Create generic transport config
   bigip_message_routing_transport_config:
-    name: foovirtual
-    profiles: "genericmsg,tcp-lan-optimized"
-    description: new_transport
+    name: mr-transport-smpp
+    partition: Common
+    profiles: "mr-protocol-smpp,f5-tcp-lan"
+    rules:
+      - smpp_generic
+    description: 'Short Message Peer-to-Peer Static Peer Transport'
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
 
 - name: Create message routing peer with additional settings
   bigip_message_routing_peer:
-    name: foobar
-    connection_mode: per-blade
-    pool: my-pool
+    name: mr-peer-smscs
+    pool: smpp-pool
     partition: Common
-    transport_config: foovirtual
+    transport_config: mr-transport-smpp
     ratio: 10
     auto_init: yes
     provider: "{{ bigip_provider }}"
@@ -36,25 +71,20 @@
 
 - name: Create a simple generic route
   bigip_message_routing_route:
-    name: route1
-    provider: "{{ bigip_provider }}"
-  delegate_to: localhost
-
-- name: Create a simple generic route
-  bigip_message_routing_route:
-    name: route2
+    name: mr-route-smpp-default
+    description: 'MR Route to all SMSCs'
+    peers:
+      - mr-peer-smscs
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
 
 
 - name: Create a generic router profile
   bigip_message_routing_router:
-    name: foorouterprofile
-    max_retries: 10
-    ignore_client_port: yes
+    name: mr-router-smpp
+    description: 'MR Router for SMPP Traffic'
     routes:
-      - /Common/route1
-      - /Common/route2
+      - /Common/mr-route-smpp-default
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
 
@@ -62,15 +92,15 @@
   bigip_virtual_server:
     state: present
     partition: Common
-    name: my-virtual-server
-    destination: 10.10.10.10
-    type: message-routing
-    port: 3868
-    pool: my-pool
-    snat: Automap
+    name: serviceMain
+    destination: 10.10.10.20
+    port: "2775"
+    irules:
+      - smpp_generic
     description: Test Virtual Server
     profiles:
-      - tcp
-      - diameter
+      - f5-tcp-progressive
+      - mr-router-smpp
+      - mr-protocol-smpp
     provider: "{{ bigip_provider }}"
   delegate_to: localhost
