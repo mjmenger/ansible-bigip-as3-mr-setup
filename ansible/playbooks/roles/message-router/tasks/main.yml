@@ -52,7 +52,7 @@
     pool: smpp-pool
     partition: Common
     port: 2776
-    fqdn: ip-10-0-253-250.ec2.internal
+    fqdn: "{{ pool_member_dns }}"
     monitors: tcp
   delegate_to: localhost
 
@@ -120,7 +120,7 @@
     state: present
     partition: Common
     name: serviceMain
-    destination: 10.0.253.160
+    destination: "{{ mr_destination }}"
     port: "2775"
     irules:
       - smpp_generic

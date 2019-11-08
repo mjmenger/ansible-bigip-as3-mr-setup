@@ -3,11 +3,13 @@ all:
   children:
     big_ips:
       hosts:
-        10.10.10.10:
+        44.226.108.180:
           bigip_provider:
             server: "{{ inventory_hostname }}"
             user: "admin"
-            password: "abcdef123"
+            password: "h0ZClP60IH%7mbwR"
             validate_certs: no
           bigip_validate_certs: false
+          mr_destination: 10.0.253.160
+          pool_member_dns: "ip-10-0-253-250.ec2.internal"
 
