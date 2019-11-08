@@ -1,6 +1,6 @@
 ---
 #
-# following instructions found at 
+# following instructions found at
 # https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-service-provider-message-routing-administration-13-0-0/2.html
 #
 
@@ -9,6 +9,23 @@
     url: 'https://raw.githubusercontent.com/rduchez/SMPP/master/smpp_irule_basic'
     dest: "~/smpp_irule.tcl"
     mode: '0440'
+
+- name: Create data-group
+  bigip_data_group:
+    provider: "{{ bigip_provider }}"
+    name: smpp-config-elements
+    internal: yes
+    records:
+      - key: "bigip-system-id"
+        value: "smppclient1"
+      - key: "bigip-system-id-password"
+        value: "password"
+      - key: "smsc-pool-name"
+        value: "/Common/smpp-pool"
+      - key: "smsc-transport-config-name"
+        value: "/Common/mr-protocol-smpp"
+    type: string
+  delegate_to: localhost
 
 - name: Add the iRule contained in template irule.tcl to the LTM module
   bigip_irule:
@@ -27,6 +44,16 @@
     partition: Common
     lb_method: least-connections-member
     slow_ramp_time: 120
+  delegate_to: localhost
+
+- name: Add pool-member
+  bigip_pool_member:
+    provider: "{{ bigip_provider }}"
+    pool: smpp-pool
+    partition: Common
+    port: 2776
+    fqdn: "{{ pool_member_dns }}"
+    monitors: tcp
   delegate_to: localhost
 
 - name: Create a generic parser
@@ -93,7 +120,7 @@
     state: present
     partition: Common
     name: serviceMain
-    destination: 10.10.10.20
+    destination: "{{ mr_destination }}"
     port: "2775"
     irules:
       - smpp_generic
